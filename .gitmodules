@@ -1,0 +1,12 @@
+[submodule "lib/amp"]
+	path = lib/amp
+	url = https://github.com/joelguittet/c-amp.git
+[submodule "lib/discover"]
+	path = lib/discover
+	url = https://github.com/joelguittet/c-discover.git
+[submodule "lib/axon"]
+	path = lib/axon
+	url = https://github.com/joelguittet/c-axon.git
+[submodule "lib/cJSON"]
+	path = lib/cJSON
+	url = https://github.com/DaveGamble/cJSON.git

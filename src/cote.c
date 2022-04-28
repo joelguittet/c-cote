@@ -247,11 +247,11 @@ int cote_set_option(cote_t *cote, char *option, void *value) {
   } else if (!strcmp("hostname", option)) {
     ret = discover_set_option(cote->discover, option, value);
   } else if (!strcmp("namespace", option)) {
-    if (NULL != cote->options.namespace) {
-      free(cote->options.namespace);
+    if (NULL != cote->options.namespace_) {
+      free(cote->options.namespace_);
     }
-    cote->options.namespace = strdup((char *)value);
-    if (NULL != cote->options.namespace) {
+    cote->options.namespace_ = strdup((char *)value);
+    if (NULL != cote->options.namespace_) {
       ret = 0;
     }
   } else if (!strcmp("useHostNames", option)) {
@@ -635,8 +635,8 @@ void cote_release(cote_t *cote) {
     
     /* Release options */
     sem_wait(&cote->options.sem);
-    if (NULL != cote->options.namespace) {
-      free (cote->options.namespace);
+    if (NULL != cote->options.namespace_) {
+      free (cote->options.namespace_);
     }
     if (NULL != cote->options.advertisement) {
       cJSON_Delete(cote->options.advertisement);
@@ -770,7 +770,7 @@ static amp_msg_t *cote_axon_message_cb(axon_t *axon, amp_msg_t *amp, void *user)
             if (0 == regexec(&regex, topic_field->data, 0, NULL, 0)) {
               /* Topic match subscription */
               /* Invoke subscription callback */
-              ret = curr_sub->fct(cote, topic_field->data + strlen("message::") + ((NULL != cote->options.namespace) ? (strlen(cote->options.namespace) + 2) : 0), amp, curr_sub->user);
+              ret = curr_sub->fct(cote, topic_field->data + strlen("message::") + ((NULL != cote->options.namespace_) ? (strlen(cote->options.namespace_) + 2) : 0), amp, curr_sub->user);
             }
             regfree(&regex);
           }
@@ -858,8 +858,8 @@ static char *cote_axon_format_fulltopic(cote_t *cote, char *topic) {
     
     /* Format full topic */
     size_t len = 0;
-    if (NULL != cote->options.namespace) {
-      len = strlen("message::") + strlen(cote->options.namespace) + strlen("::") + strlen(topic) + 1;
+    if (NULL != cote->options.namespace_) {
+      len = strlen("message::") + strlen(cote->options.namespace_) + strlen("::") + strlen(topic) + 1;
     } else {
       len = strlen("message::") + strlen(topic) + 1;
     }
@@ -870,8 +870,8 @@ static char *cote_axon_format_fulltopic(cote_t *cote, char *topic) {
     }
     memset(fulltopic, 0, len);
     strcat(fulltopic, "message::");
-    if (NULL != cote->options.namespace) {
-      strcat(fulltopic, cote->options.namespace);
+    if (NULL != cote->options.namespace_) {
+      strcat(fulltopic, cote->options.namespace_);
       strcat(fulltopic, "::");
     }
     strcat(fulltopic, topic);
@@ -1065,8 +1065,8 @@ static int cote_discovery_set_advertisement(cote_t *cote) {
   }
   cJSON_AddStringToObject(advertisement, "type", (COTE_TYPE_MON == cote->type) ? "monitor" : "service");
   cJSON_AddStringToObject(advertisement, "name", cote->name);
-  if (NULL != cote->options.namespace) {
-    cJSON_AddStringToObject(advertisement, "namespace", cote->options.namespace);
+  if (NULL != cote->options.namespace_) {
+    cJSON_AddStringToObject(advertisement, "namespace", cote->options.namespace_);
   }
   if ((COTE_TYPE_PUB == cote->type) && (NULL != cote->options.broadcasts)) {
     cJSON *broadcasts = cJSON_Duplicate(cote->options.broadcasts, 1);
@@ -1156,13 +1156,13 @@ static int cote_discovery_check_node(cote_t *cote, discover_node_t *node) {
     }
     cJSON *namespace = cJSON_GetObjectItemCaseSensitive(node->data.advertisement, "namespace");
     sem_wait(&cote->options.sem);
-    if (NULL != cote->options.namespace) {
+    if (NULL != cote->options.namespace_) {
       if (NULL == namespace) {
         /* No namespace, ignore message */
         sem_post(&cote->options.sem);
         return -1;
       }
-      if (strcmp(cote->options.namespace, cJSON_GetStringValue(namespace))) {
+      if (strcmp(cote->options.namespace_, cJSON_GetStringValue(namespace))) {
         /* Invalid namespace, ignore message */
         sem_post(&cote->options.sem);
         return -1;

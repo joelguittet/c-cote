@@ -103,7 +103,7 @@ typedef struct cote_s {
   char *name;                                                       /* Name of the instance */
   uint16_t port;                                                    /* Port of axon instance */
   struct {
-    char *namespace;                                                /* Namespace used to format message topics */
+    char *namespace_;                                               /* Namespace used to format message topics */
     bool use_hostname;                                              /* Use hostname instead of address to connect to the other nodes */
     cJSON *advertisement;                                           /* The initial advertisement which is sent with each hello packet */
     cJSON *broadcasts;                                              /* Publisher broadcast string array */

@@ -1,3 +1,28 @@
+# @file      CMakeLists.txt
+# @brief     c-cote library CMakeLists file
+#
+# MIT License
+#
+# Copyright (c) 2021-2023 joelguittet and c-cote contributors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 # CMake minimum version
 cmake_minimum_required(VERSION 3.14)
 
@@ -5,9 +30,14 @@ cmake_minimum_required(VERSION 3.14)
 project(c-cote)
 
 # Project version
-set(COTE_VERSION_MAJOR 1)
-set(COTE_VERSION_MINOR 0)
-set(COTE_VERSION_PATCH 0)
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/VERSION PROJECT_VER LIMIT_COUNT 1)
+string(REPLACE "." ";" PROJECT_VER_LIST ${PROJECT_VER})
+list(GET PROJECT_VER_LIST 0 PROJECT_VER_MAJOR)
+list(GET PROJECT_VER_LIST 1 PROJECT_VER_MINOR)
+list(GET PROJECT_VER_LIST 2 PROJECT_VER_PATCH)
+
+# Use GNU installation directories
+include(GNUInstallDirs)
 
 # Additional flags
 set(c_flags "${c_flags} -Os -ffunction-sections -Wall -fPIC")
@@ -17,48 +47,39 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
 # Definitions
 add_definitions(-DCOTE_EXPORT_SYMBOLS -DCOTE_API_VISIBILITY)
 
-# Output directories
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
-
 # CMake subdirectories
-if (NOT TARGET amp)
-  if(EXISTS lib/amp)
-    add_subdirectory(lib/amp)
-  endif()
+if(NOT TARGET amp)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/amp/CMakeLists.txt)
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/amp)
+    endif()
 endif()
-if (NOT TARGET axon)
-  if(EXISTS lib/axon)
-    add_subdirectory(lib/axon)
-  endif()
+if(NOT TARGET axon)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/axon/CMakeLists.txt)
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/axon)
+    endif()
 endif()
-if (NOT TARGET discover)
-  if(EXISTS lib/discover)
-    add_subdirectory(lib/discover)
-  endif()
-endif()
-if(NOT TARGET cjson)
-  if(EXISTS lib/cJSON)
-    add_subdirectory(lib/cJSON)
-  endif()
+if(NOT TARGET discover)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/discover/CMakeLists.txt)
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/discover)
+    endif()
 endif()
 
 # List of sources
-file(GLOB_RECURSE src "src/*.c")
+file(GLOB_RECURSE src ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
 
 # Add include directories
-include_directories(inc)
-if(EXISTS lib/amp)
-  include_directories(lib/amp/inc)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/amp/include)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/amp/include)
 endif()
-if(EXISTS lib/axon)
-  include_directories(lib/axon/inc)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/amp/lib/cJSON/cJSON.h)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/amp/lib/cJSON)
 endif()
-if(EXISTS lib/discover)
-  include_directories(lib/discover/inc)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/axon/include)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/axon/include)
 endif()
-if(EXISTS lib/cJSON)
-  include_directories(lib/cJSON)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/lib/discover/include)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/discover/include)
 endif()
 
 # Creation of the library
@@ -69,92 +90,56 @@ target_link_libraries(cote discover axon amp cjson pthread rt)
 
 # Properties of the library
 set_target_properties(cote
-  PROPERTIES
-  SOVERSION "${COTE_VERSION_MAJOR}"
-  VERSION "${COTE_VERSION_MAJOR}.${COTE_VERSION_MINOR}.${COTE_VERSION_PATCH}"
+    PROPERTIES
+    SOVERSION "${PROJECT_VER_MAJOR}"
+    VERSION "${PROJECT_VER_MAJOR}.${PROJECT_VER_MINOR}.${PROJECT_VER_PATCH}"
 )
 
 # Creation of the examples binaries
 option(ENABLE_COTE_EXAMPLES "Enable building cote examples" OFF)
 if(ENABLE_COTE_EXAMPLES)
-  add_executable(monitor "examples/monitor/monitor.c")
-  target_link_libraries(monitor cote)
-  add_executable(publisher "examples/pubsub/publisher.c")
-  target_link_libraries(publisher cote)
-  add_executable(subscriber "examples/pubsub/subscriber.c")
-  target_link_libraries(subscriber cote)
-  add_executable(publisher_namespace1 "examples/pubsub_namespace/publisher_namespace1.c")
-  target_link_libraries(publisher_namespace1 cote)
-  add_executable(subscriber_namespace1 "examples/pubsub_namespace/subscriber_namespace1.c")
-  target_link_libraries(subscriber_namespace1 cote)
-  add_executable(publisher_topic1_topic2 "examples/pubsub_topics/publisher_topic1_topic2.c")
-  target_link_libraries(publisher_topic1_topic2 cote)
-  add_executable(subscriber_topic1_topic2 "examples/pubsub_topics/subscriber_topic1_topic2.c")
-  target_link_libraries(subscriber_topic1_topic2 cote)
-  add_executable(subscriber_topic1 "examples/pubsub_topics/subscriber_topic1.c")
-  target_link_libraries(subscriber_topic1 cote)
-  add_executable(subscriber_topic2 "examples/pubsub_topics/subscriber_topic2.c")
-  target_link_libraries(subscriber_topic2 cote)
-  add_executable(subscriber_topics "examples/pubsub_topics/subscriber_topics.c")
-  target_link_libraries(subscriber_topics cote)
-  add_executable(requester "examples/reqrep/requester.c")
-  target_link_libraries(requester cote)
-  add_executable(responder "examples/reqrep/responder.c")
-  target_link_libraries(responder cote)
+    add_executable(monitor ${CMAKE_CURRENT_SOURCE_DIR}/examples/monitor/monitor.c)
+    target_link_libraries(monitor cote)
+    add_executable(publisher ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub/publisher.c)
+    target_link_libraries(publisher cote)
+    add_executable(subscriber ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub/subscriber.c)
+    target_link_libraries(subscriber cote)
+    add_executable(publisher_namespace1 ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_namespace/publisher_namespace1.c)
+    target_link_libraries(publisher_namespace1 cote)
+    add_executable(subscriber_namespace1 ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_namespace/subscriber_namespace1.c)
+    target_link_libraries(subscriber_namespace1 cote)
+    add_executable(publisher_topic1_topic2 ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_topics/publisher_topic1_topic2.c)
+    target_link_libraries(publisher_topic1_topic2 cote)
+    add_executable(subscriber_topic1_topic2 ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_topics/subscriber_topic1_topic2.c)
+    target_link_libraries(subscriber_topic1_topic2 cote)
+    add_executable(subscriber_topic1 ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_topics/subscriber_topic1.c)
+    target_link_libraries(subscriber_topic1 cote)
+    add_executable(subscriber_topic2 ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_topics/subscriber_topic2.c)
+    target_link_libraries(subscriber_topic2 cote)
+    add_executable(subscriber_topics ${CMAKE_CURRENT_SOURCE_DIR}/examples/pubsub_topics/subscriber_topics.c)
+    target_link_libraries(subscriber_topics cote)
+    add_executable(requester ${CMAKE_CURRENT_SOURCE_DIR}/examples/reqrep/requester.c)
+    target_link_libraries(requester cote)
+    add_executable(responder ${CMAKE_CURRENT_SOURCE_DIR}/examples/reqrep/responder.c)
+    target_link_libraries(responder cote)
 endif()
 
 # Installation
 set(CMAKE_INSTALL_FULL_LIBDIR lib)
 set(CMAKE_INSTALL_FULL_BINDIR bin)
 set(CMAKE_INSTALL_FULL_INCLUDEDIR include)
-if(EXISTS lib/cJSON)
-  install(FILES lib/cJSON/cJSON.h DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
-  install(TARGETS cjson
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
-  )
-endif()
-if(EXISTS lib/amp)
-  install(FILES lib/amp/inc/amp.h DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
-  install(TARGETS amp
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
-  )
-endif()
-if(EXISTS lib/axon)
-  install(FILES lib/axon/inc/axon.h DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
-  install(TARGETS axon
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
-  )
-endif()
-if(EXISTS lib/discover)
-  install(FILES lib/discover/inc/discover.h DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
-  install(TARGETS discover
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
-  )
-endif()
-install(FILES inc/cote.h DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/cote.h DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 install(TARGETS cote
-  ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-  LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-  RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
-  INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
+    INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
 )
 if(ENABLE_COTE_EXAMPLES)
-  install(TARGETS monitor publisher subscriber publisher_namespace1 subscriber_namespace1 publisher_topic1_topic2 subscriber_topic1_topic2 subscriber_topic1 subscriber_topic2 subscriber_topics requester responder
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
-    INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
-  )
+    install(TARGETS monitor publisher subscriber publisher_namespace1 subscriber_namespace1 publisher_topic1_topic2 subscriber_topic1_topic2 subscriber_topic1 subscriber_topic2 subscriber_topics requester responder
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
+        RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_BINDIR}"
+        INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
+    )
 endif()

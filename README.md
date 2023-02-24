@@ -1,6 +1,6 @@
 # c-cote
 
-[![CMake Badge](https://github.com/joelguittet/c-cote/workflows/CMake%20+%20SonarCloud%20Analysis/badge.svg)](https://github.com/joelguittet/c-cote/actions)
+[![CI Badge](https://github.com/joelguittet/c-cote/workflows/ci/badge.svg)](https://github.com/joelguittet/c-cote/actions)
 [![Issues Badge](https://img.shields.io/github/issues/joelguittet/c-cote)](https://github.com/joelguittet/c-cote/issues)
 [![License Badge](https://img.shields.io/github/license/joelguittet/c-cote)](https://github.com/joelguittet/c-cote/blob/master/LICENSE)
 
@@ -34,8 +34,19 @@ This repository is not a fork of [cote](https://github.com/dashersw/cote) ! It h
 Build `libcote.so` with the following commands:
 
 ``` bash
-cmake .
+mkdir build
+cd build
+cmake ..
 make
+```
+
+
+## Installing
+
+Install `libcote.so` with the following commands:
+
+``` bash
+make install
 ```
 
 ## Protocol
@@ -50,10 +61,10 @@ This library is compatible with [cote](https://github.com/dashersw/cote) release
 
 ## Examples
 
-Several examples are available in the `examples\` directory.
-
 Build examples with the following commands:
 ``` bash
+mkdir build
+cd build
 cmake -DENABLE_COTE_EXAMPLES=ON .
 make
 ```

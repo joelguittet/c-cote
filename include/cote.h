@@ -1,15 +1,35 @@
 /**
- * @file cote.h
- * @brief Cote library
+ * @file      cote.h
+ * @brief     Cote library
+ *
+ * MIT License
+ *
+ * Copyright (c) 2021-2023 joelguittet and c-cote contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
-
 
 #ifndef __COTE_H__
 #define __COTE_H__
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #if !defined(__WINDOWS__) && (defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32))
@@ -36,7 +56,7 @@ then using the COTE_API_VISIBILITY flag to "export" the same symbols the way COT
 
 */
 
-#define COTE_CDECL __cdecl
+#define COTE_CDECL   __cdecl
 #define COTE_STDCALL __stdcall
 
 /* export symbols by default, this is necessary for copy pasting the C and header file */
@@ -45,23 +65,22 @@ then using the COTE_API_VISIBILITY flag to "export" the same symbols the way COT
 #endif
 
 #if defined(COTE_HIDE_SYMBOLS)
-#define COTE_PUBLIC(type)   type COTE_STDCALL
+#define COTE_PUBLIC(type) type COTE_STDCALL
 #elif defined(COTE_EXPORT_SYMBOLS)
-#define COTE_PUBLIC(type)   __declspec(dllexport) type COTE_STDCALL
+#define COTE_PUBLIC(type) __declspec(dllexport) type COTE_STDCALL
 #elif defined(COTE_IMPORT_SYMBOLS)
-#define COTE_PUBLIC(type)   __declspec(dllimport) type COTE_STDCALL
+#define COTE_PUBLIC(type) __declspec(dllimport) type COTE_STDCALL
 #endif
 #else /* !__WINDOWS__ */
 #define COTE_CDECL
 #define COTE_STDCALL
 
-#if (defined(__GNUC__) || defined(__SUNPRO_CC) || defined (__SUNPRO_C)) && defined(COTE_API_VISIBILITY)
-#define COTE_PUBLIC(type)   __attribute__((visibility("default"))) type
+#if (defined(__GNUC__) || defined(__SUNPRO_CC) || defined(__SUNPRO_C)) && defined(COTE_API_VISIBILITY)
+#define COTE_PUBLIC(type) __attribute__((visibility("default"))) type
 #else
 #define COTE_PUBLIC(type) type
 #endif
 #endif
-
 
 /******************************************************************************/
 /* Includes                                                                   */
@@ -74,70 +93,68 @@ then using the COTE_API_VISIBILITY flag to "export" the same symbols the way COT
 #include "discover.h"
 #include "axon.h"
 
-
 /******************************************************************************/
 /* Definitions                                                                */
 /******************************************************************************/
 
 /* Cote type */
 typedef enum {
-  COTE_TYPE_PUB,                                                    /* Publisher (server which is broadcasting data to all its clients) */
-  COTE_TYPE_SUB,                                                    /* Subscriber (client receiving broadcasted data from the Publisher server) */
-  COTE_TYPE_REQ,                                                    /* Requester (client sending requests and receiving responses from the Replier server - with Round-Robin mechanism and queing) */
-  COTE_TYPE_REP,                                                    /* Replier (server waiting for message from clients and replying to the client) */
-  COTE_TYPE_MON                                                     /* Monitor (discover configuration only) */
+    COTE_TYPE_PUB, /* Publisher (server which is broadcasting data to all its clients) */
+    COTE_TYPE_SUB, /* Subscriber (client receiving broadcasted data from the Publisher server) */
+    COTE_TYPE_REQ, /* Requester (client sending requests and receiving responses from the Replier server - with Round-Robin mechanism and queing) */
+    COTE_TYPE_REP, /* Replier (server waiting for message from clients and replying to the client) */
+    COTE_TYPE_MON  /* Monitor (discover configuration only) */
 } cote_enum_e;
 
 /* Cote topic subscription */
 struct cote_s;
 typedef struct cote_sub_s {
-  struct cote_sub_s *next;                                          /* Next subscription */
-  char *topic;                                                      /* Topic of the subscription */
-  amp_msg_t *(*fct)(struct cote_s *, char *, amp_msg_t *, void *);  /* Callback function invoked when topic is received */
-  void *user;                                                       /* User data passed to the callback */
+    struct cote_sub_s *next;                                         /* Next subscription */
+    char *             topic;                                        /* Topic of the subscription */
+    amp_msg_t *(*fct)(struct cote_s *, char *, amp_msg_t *, void *); /* Callback function invoked when topic is received */
+    void *user;                                                      /* User data passed to the callback */
 } cote_sub_t;
 
 /* Cote instance */
 typedef struct cote_s {
-  cote_enum_e type;                                                 /* Cote instance type */
-  char *name;                                                       /* Name of the instance */
-  uint16_t port;                                                    /* Port of axon instance */
-  struct {
-    char *namespace_;                                               /* Namespace used to format message topics */
-    bool use_hostname;                                              /* Use hostname instead of address to connect to the other nodes */
-    cJSON *advertisement;                                           /* The initial advertisement which is sent with each hello packet */
-    cJSON *broadcasts;                                              /* Publisher broadcast string array */
-    cJSON *subscribesTo;                                            /* Subscriber subscribe string array */
-    cJSON *requests;                                                /* Requester request string array */
-    cJSON *respondsTo;                                              /* Replier respond string array */
-    sem_t sem;                                                      /* Semaphore used to protect options */
-  } options;
-  discover_t *discover;                                             /* Discover instance */
-  axon_t *axon;                                                     /* Axon instance */
-  struct {
-    cote_sub_t *first;                                              /* Topic subscription daisy chain */
-    sem_t sem;                                                      /* Semaphore used to protect daisy chain */
-  } subs;
-  struct {
+    cote_enum_e type; /* Cote instance type */
+    char *      name; /* Name of the instance */
+    uint16_t    port; /* Port of axon instance */
     struct {
-      amp_msg_t *(*fct)(struct cote_s *, amp_msg_t *, void *);      /* Callback function invoked when message is received */
-      void *user;                                                   /* User data passed to the callback */
-    } message;
+        char * namespace_;    /* Namespace used to format message topics */
+        bool   use_hostname;  /* Use hostname instead of address to connect to the other nodes */
+        cJSON *advertisement; /* The initial advertisement which is sent with each hello packet */
+        cJSON *broadcasts;    /* Publisher broadcast string array */
+        cJSON *subscribesTo;  /* Subscriber subscribe string array */
+        cJSON *requests;      /* Requester request string array */
+        cJSON *respondsTo;    /* Replier respond string array */
+        sem_t  sem;           /* Semaphore used to protect options */
+    } options;
+    discover_t *discover; /* Discover instance */
+    axon_t *    axon;     /* Axon instance */
     struct {
-      void *(*fct)(struct cote_s *, discover_node_t *, void *);     /* Callback function invoked when a node is added */
-      void *user;                                                   /* User data passed to the callback */
-    } added;
+        cote_sub_t *first; /* Topic subscription daisy chain */
+        sem_t       sem;   /* Semaphore used to protect daisy chain */
+    } subs;
     struct {
-      void *(*fct)(struct cote_s *, discover_node_t *, void *);     /* Callback function invoked when a node is removed */
-      void *user;                                                   /* User data passed to the callback */
-    } removed;
-    struct {
-      void *(*fct)(struct cote_s *, char *, void *);                /* Callback function invoked when an error occurs */
-      void *user;                                                   /* User data passed to the callback */
-    } error;
-  } cb;
+        struct {
+            amp_msg_t *(*fct)(struct cote_s *, amp_msg_t *, void *); /* Callback function invoked when message is received */
+            void *user;                                              /* User data passed to the callback */
+        } message;
+        struct {
+            void *(*fct)(struct cote_s *, discover_node_t *, void *); /* Callback function invoked when a node is added */
+            void *user;                                               /* User data passed to the callback */
+        } added;
+        struct {
+            void *(*fct)(struct cote_s *, discover_node_t *, void *); /* Callback function invoked when a node is removed */
+            void *user;                                               /* User data passed to the callback */
+        } removed;
+        struct {
+            void *(*fct)(struct cote_s *, char *, void *); /* Callback function invoked when an error occurs */
+            void *user;                                    /* User data passed to the callback */
+        } error;
+    } cb;
 } cote_t;
-
 
 /******************************************************************************/
 /* Prototypes                                                                 */
@@ -227,7 +244,6 @@ COTE_PUBLIC(int) cote_send(cote_t *cote, char *topic, int count, ...);
  * @param cote Cote instance
  */
 COTE_PUBLIC(void) cote_release(cote_t *cote);
-
 
 #ifdef __cplusplus
 }

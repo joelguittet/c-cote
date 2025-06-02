@@ -4,7 +4,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2021-2023 joelguittet and c-cote contributors
+ * Copyright joelguittet and c-cote contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -602,7 +602,7 @@ cote_send(cote_t *cote, char *topic, int count, ...) {
 
     } else if (COTE_TYPE_REQ == cote->type) {
 
-        cJSON *     json    = NULL;
+        cJSON      *json    = NULL;
         amp_msg_t **resp    = NULL;
         int         timeout = 0;
 
@@ -990,9 +990,9 @@ cote_discovery_added_cb(discover_t *discover, discover_node_t *node, void *user)
                 for (int index_subscribesTo = 0; (index_subscribesTo < cJSON_GetArraySize(client_topics)) && (false == match); index_subscribesTo++) {
                     for (int index_broadcasts = 0; (index_broadcasts < cJSON_GetArraySize(server_topics)) && (false == match); index_broadcasts++) {
                         cJSON *tmp1 = cJSON_GetArrayItem(client_topics, index_subscribesTo);
-                        char * str1 = cJSON_GetStringValue(tmp1);
+                        char  *str1 = cJSON_GetStringValue(tmp1);
                         cJSON *tmp2 = cJSON_GetArrayItem(server_topics, index_broadcasts);
-                        char * str2 = cJSON_GetStringValue(tmp2);
+                        char  *str2 = cJSON_GetStringValue(tmp2);
                         if ((NULL != str1) && (NULL != str2)) {
                             regex_t regex;
                             if (0 == regcomp(&regex, str1, REG_NOSUB | REG_EXTENDED)) {

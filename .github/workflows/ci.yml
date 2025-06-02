@@ -3,7 +3,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2021-2023 joelguittet and c-cote contributors
+# Copyright joelguittet and c-cote contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ on:
 jobs:
   check:
     name: Check code format
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -57,7 +57,7 @@ jobs:
           ./.github/workflows/check_code_format.sh
   build:
     name: SonarCloud analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
         with:

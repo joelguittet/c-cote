@@ -4,7 +4,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2021-2023 joelguittet and c-cote contributors
+ * Copyright joelguittet and c-cote contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -110,7 +110,7 @@ typedef enum {
 struct cote_s;
 typedef struct cote_sub_s {
     struct cote_sub_s *next;                                         /* Next subscription */
-    char *             topic;                                        /* Topic of the subscription */
+    char              *topic;                                        /* Topic of the subscription */
     amp_msg_t *(*fct)(struct cote_s *, char *, amp_msg_t *, void *); /* Callback function invoked when topic is received */
     void *user;                                                      /* User data passed to the callback */
 } cote_sub_t;
@@ -118,10 +118,10 @@ typedef struct cote_sub_s {
 /* Cote instance */
 typedef struct cote_s {
     cote_enum_e type; /* Cote instance type */
-    char *      name; /* Name of the instance */
+    char       *name; /* Name of the instance */
     uint16_t    port; /* Port of axon instance */
     struct {
-        char * namespace_;    /* Namespace used to format message topics */
+        char  *namespace_;    /* Namespace used to format message topics */
         bool   use_hostname;  /* Use hostname instead of address to connect to the other nodes */
         cJSON *advertisement; /* The initial advertisement which is sent with each hello packet */
         cJSON *broadcasts;    /* Publisher broadcast string array */
@@ -131,7 +131,7 @@ typedef struct cote_s {
         sem_t  sem;           /* Semaphore used to protect options */
     } options;
     discover_t *discover; /* Discover instance */
-    axon_t *    axon;     /* Axon instance */
+    axon_t     *axon;     /* Axon instance */
     struct {
         cote_sub_t *first; /* Topic subscription daisy chain */
         sem_t       sem;   /* Semaphore used to protect daisy chain */

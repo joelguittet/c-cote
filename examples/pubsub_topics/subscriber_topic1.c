@@ -4,7 +4,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2021-2023 joelguittet and c-cote contributors
+ * Copyright joelguittet and c-cote contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -165,7 +165,7 @@ callback(cote_t *cote, char *topic, amp_msg_t *amp, void *user) {
     (void)user;
 
     int64_t bint;
-    char *  str;
+    char   *str;
 
     printf("sub client message received from topic '%s'\n", topic);
 

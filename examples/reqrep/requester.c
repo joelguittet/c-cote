@@ -4,7 +4,7 @@
  *
  * MIT License
  *
- * Copyright (c) 2021-2023 joelguittet and c-cote contributors
+ * Copyright joelguittet and c-cote contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -118,14 +118,14 @@ main(int argc, char **argv) {
 
         /* Sending JSON object and retrieve response */
         amp_msg_t *amp  = NULL;
-        cJSON *    json = cJSON_CreateObject();
+        cJSON     *json = cJSON_CreateObject();
         cJSON_AddStringToObject(json, "payload", "hello world!");
         if (0 == cote_send(cote, "hello", 1, AMP_TYPE_JSON, json, &amp, 5000)) {
 
             assert(NULL != amp);
 
             int64_t bint;
-            char *  str;
+            char   *str;
 
             printf("req client message received\n");
 

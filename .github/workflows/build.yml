@@ -1,6 +1,5 @@
-#!/bin/bash
-# @file      build.sh
-# @brief     Build library and examples
+# @file      build.yml
+# @brief     Used to build library and example
 #
 # MIT License
 #
@@ -24,5 +23,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-cmake -B build -DENABLE_COTE_EXAMPLES=ON .
-cmake --build build -j$(nproc)
+name: build
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    steps:
+      # Checkout c-cote
+      - name: Checkout c-cote
+        uses: actions/checkout@v5
+        with:
+          path: c-cote
+
+      # Checkout submodules
+      - name: Checkout submodules
+        working-directory: c-cote
+        run: git submodule update --init --recursive
+
+      # Check code format
+      - name: Check headers
+        if: ${{ always() }}
+        working-directory: c-cote
+        run: |
+          cmake -B build -DENABLE_COTE_EXAMPLES=ON .
+          cmake --build build -j$(nproc)

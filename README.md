@@ -1,6 +1,7 @@
 # c-cote
 
-[![CI Badge](https://github.com/joelguittet/c-cote/workflows/ci/badge.svg)](https://github.com/joelguittet/c-cote/actions)
+[![Workflow check-code-format Badge](https://github.com/joelguittet/c-cote/workflows/check-code-format/badge.svg)](https://github.com/joelguittet/c-cote/actions)
+[![Workflow build Badge](https://github.com/joelguittet/c-cote/workflows/build/badge.svg)](https://github.com/joelguittet/c-cote/actions)
 [![Issues Badge](https://img.shields.io/github/issues/joelguittet/c-cote)](https://github.com/joelguittet/c-cote/issues)
 [![License Badge](https://img.shields.io/github/license/joelguittet/c-cote)](https://github.com/joelguittet/c-cote/blob/master/LICENSE)
 

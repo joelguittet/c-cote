@@ -1,5 +1,5 @@
-# @file      ci.yml
-# @brief     Used to perform code format checking and Sonarcloud analysis
+# @file      check-code-format.yml
+# @brief     Used to perform code format checking
 #
 # MIT License
 #
@@ -23,55 +23,49 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-name: ci
+name: check-code-format
+
 on:
   push:
     branches:
       - '**'
   pull_request:
     types: [opened, synchronize, reopened]
-  schedule:
-    - cron: '0 0 1 * *'
+
 jobs:
-  check:
+  check-code-format:
     name: Check code format
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      # Install tools
       - name: Install tools
         run: |
           sudo apt-get install clang-format pcregrep
+
+      # Checkout c-cote
+      - name: Checkout c-cote
+        uses: actions/checkout@v5
+        with:
+          path: c-cote
+
+      # Check code format
       - name: Check headers
+        if: ${{ always() }}
+        working-directory: c-cote
         run: |
           ./.github/workflows/check_headers.sh
       - name: Check include guards
+        if: ${{ always() }}
+        working-directory: c-cote
         run: |
           ./.github/workflows/check_include_guards.sh
       - name: Check equivalence tests
+        if: ${{ always() }}
+        working-directory: c-cote
         run: |
           ./.github/workflows/check_equivalence_tests.sh
       - name: Check code format
+        if: ${{ always() }}
+        working-directory: c-cote
         run: |
           ./.github/workflows/check_code_format.sh
-  build:
-    name: SonarCloud analysis
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Install sonar-scanner and build-wrapper
-        uses: SonarSource/sonarcloud-github-c-cpp@v2
-      - name: Run build-wrapper
-        run: |
-          build-wrapper-linux-x86-64 --out-dir bw_output ./.github/workflows/build.sh
-      - name: Run sonar-scanner
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner -Dsonar.organization=joelguittet -Dsonar.projectKey=joelguittet_c-cote -Dsonar.inclusions=include/**/*,src/**/* -Dsonar.projectVersion=$(cat VERSION) -Dsonar.cfamily.build-wrapper-output=bw_output
